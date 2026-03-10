@@ -3,7 +3,7 @@
  * React Router + Dark Mode + 搜尋列 + 導覽列 + 手機底部 Tab
  */
 import { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { HashRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 import SearchBar from './components/SearchBar';
 import StockDetail from './pages/StockDetail';
 import Dashboard from './pages/Dashboard';
@@ -32,8 +32,8 @@ function MobileNav() {
               key={tab.to}
               to={tab.to}
               className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-colors ${active
-                  ? 'text-primary-600 dark:text-primary-400'
-                  : 'text-surface-500 hover:text-surface-700 dark:hover:text-surface-300'
+                ? 'text-primary-600 dark:text-primary-400'
+                : 'text-surface-500 hover:text-surface-700 dark:hover:text-surface-300'
                 }`}
             >
               <span className="text-lg">{tab.icon}</span>
@@ -142,9 +142,9 @@ function AppLayout() {
 
 function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <AppLayout />
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
