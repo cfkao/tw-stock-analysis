@@ -1,0 +1,26 @@
+# === Web Framework ===
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+python-multipart==0.0.19
+
+# === Database ===
+sqlalchemy[asyncio]==2.0.36
+asyncpg==0.30.0
+alembic==1.14.1
+psycopg2-binary==2.9.10
+
+# === Data Processing ===
+pandas==2.2.3
+numpy==2.2.1
+httpx==0.28.1
+
+# === Configuration ===
+pydantic==2.10.4
+pydantic-settings==2.7.1
+python-dotenv==1.0.1
+
+# === Scheduling ===
+apscheduler==3.10.4
+
+# === Line Bot (Phase 5) ===
+# line-bot-sdk==3.14.0

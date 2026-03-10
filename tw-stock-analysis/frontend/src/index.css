@@ -1,0 +1,91 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-surface-50 text-surface-900 antialiased;
+    @apply dark:bg-surface-950 dark:text-surface-100;
+  }
+
+  /* 自訂捲軸 */
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-surface-200 rounded-full;
+    @apply dark:bg-surface-800;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-surface-300;
+    @apply dark:bg-surface-700;
+  }
+}
+
+@layer components {
+
+  /* 玻璃態卡片 */
+  .card {
+    @apply bg-white/80 backdrop-blur-sm border border-surface-200 rounded-2xl shadow-sm;
+    @apply dark:bg-surface-900/80 dark:border-surface-800;
+    @apply transition-all duration-200;
+  }
+
+  .card:hover {
+    @apply shadow-md border-primary-200;
+    @apply dark:border-primary-800;
+  }
+
+  /* 漲跌色彩 */
+  .text-up {
+    @apply text-red-600 dark:text-red-400;
+  }
+
+  .text-down {
+    @apply text-green-600 dark:text-green-400;
+  }
+
+  /* 搜尋列 */
+  .search-input {
+    @apply w-full px-4 py-3 rounded-xl;
+    @apply bg-surface-100 border border-surface-200;
+    @apply dark:bg-surface-850 dark:border-surface-800;
+    @apply text-surface-900 dark:text-surface-100;
+    @apply placeholder-gray-400 dark:placeholder-gray-600;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-primary-500;
+    @apply transition-all duration-200;
+  }
+
+  /* 按鈕 */
+  .btn-primary {
+    @apply px-5 py-2.5 rounded-xl font-medium;
+    @apply bg-primary-600 text-white;
+    @apply hover:bg-primary-700 active:bg-primary-800;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary-500/40;
+    @apply transition-all duration-150;
+  }
+
+  .btn-ghost {
+    @apply px-4 py-2 rounded-xl font-medium;
+    @apply text-surface-900 dark:text-surface-100;
+    @apply hover:bg-surface-100 dark:hover:bg-surface-850;
+    @apply transition-all duration-150;
+  }
+
+  /* 手機底部安全區 */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
