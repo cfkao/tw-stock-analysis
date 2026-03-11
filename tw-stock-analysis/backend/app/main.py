@@ -52,7 +52,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="台股價值投資分析系統",
     description="長期價值投資者的專業股票分析工具 — 聚焦企業體質與合理估值",
-    version="0.1.2",
+    version="0.1.3",
     lifespan=lifespan,
 )
 
@@ -98,9 +98,21 @@ app.include_router(news.router, prefix="/api/v1/stocks", tags=["股票新聞"])
 async def root():
     return {
         "name": "台股價值投資分析系統",
-        "version": "0.1.0",
+        "version": app.version,
         "status": "running",
     }
+
+@app.get("/api/v1/sync/init-db", tags=["資料同步"])
+async def manual_init_db():
+    from app.database import engine, Base
+    import app.models
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        return {"status": "success", "message": "資料庫表已手動建立/同步完成"}
+    except Exception as e:
+        logger.error(f"手動初始化失敗: {e}")
+        return {"status": "error", "message": str(e)}
 
 
 @app.get("/health", tags=["系統"])
