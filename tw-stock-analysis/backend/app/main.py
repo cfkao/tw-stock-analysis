@@ -29,6 +29,7 @@ async def lifespan(app: FastAPI):
     from app.services.scheduler import scheduler_service
     scheduler_service.start()
     logger.info("⏰ 排程器已啟動")
+    logger.info(f"🌐 允許的 CORS 來源: {settings.cors_origins}")
 
     yield
 

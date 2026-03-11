@@ -34,7 +34,17 @@ class Settings(BaseSettings):
 
     @property
     def cors_origins(self) -> list[str]:
-        return [origin.strip() for origin in self.backend_cors_origins.split(",")]
+        origins = [origin.strip() for origin in self.backend_cors_origins.split(",")]
+        # 自動加入常用變體 (避免漏掉有沒有斜線的狀況)
+        base_origins = list(origins)
+        for o in base_origins:
+            if o.endswith("/"):
+                alt = o[:-1]
+            else:
+                alt = o + "/"
+            if alt not in origins:
+                origins.append(alt)
+        return origins
 
     class Config:
         env_file = ".env"
