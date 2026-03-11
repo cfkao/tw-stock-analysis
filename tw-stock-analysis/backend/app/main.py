@@ -25,7 +25,17 @@ async def lifespan(app: FastAPI):
     # 啟動時
     logger.info("🚀 台股價值投資分析系統啟動中...")
 
-    # 啟動排程器 (Phase 2)
+    # 1. 自動初始化資料庫表 (如果是新資料庫，例如 Render 上的 PostgreSQL)
+    from app.database import engine, Base
+    import app.models  # 確保所有 Model 都被載入以生成 Metadata
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        logger.info("✅ 資料庫表已同步/建立完成")
+    except Exception as e:
+        logger.error(f"❌ 資料庫初始化失敗: {e}")
+
+    # 2. 啟動排程器 (Phase 2)
     from app.services.scheduler import scheduler_service
     scheduler_service.start()
     logger.info("⏰ 排程器已啟動")
@@ -45,11 +55,20 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS 設定
+# CORS 設定 - 為了穩定性，生產環境建議列出具體來源
+# 如果 allow_origins=["*"], 則 allow_credentials 必須為 False
+origins = settings.cors_origins
+if "*" in origins:
+    allow_all = True
+    credentials = False
+else:
+    allow_all = False
+    credentials = True
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,  # 與 allow_origins=["*"] 相容
+    allow_origins=origins,
+    allow_credentials=credentials,
     allow_methods=["*"],
     allow_headers=["*"],
 )
