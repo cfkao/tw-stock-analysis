@@ -4,7 +4,7 @@
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
@@ -55,22 +55,22 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS 設定 - 為了穩定性，生產環境建議列出具體來源
-# 如果 allow_origins=["*"], 則 allow_credentials 必須為 False
-origins = settings.cors_origins
-if "*" in origins:
-    allow_all = True
-    credentials = False
-else:
-    allow_all = False
-    credentials = True
+# 請求日誌中間件 (Debug)
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    logger.info(f"📡 收到請求: {request.method} {request.url}")
+    response = await call_next(request)
+    logger.info(f"✅ 回應請求: {request.method} {request.url} 狀態碼: {response.status_code}")
+    return response
 
+# CORS 設定 - 極致相容模式
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=credentials,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # 註冊路由
