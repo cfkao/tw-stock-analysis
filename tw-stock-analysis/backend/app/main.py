@@ -40,6 +40,7 @@ async def lifespan(app: FastAPI):
     scheduler_service.start()
     logger.info("⏰ 排程器已啟動")
     logger.info(f"🌐 允許的 CORS 來源: {settings.cors_origins}")
+    logger.info(f"🗄️ 使用的資料庫網址: {settings.async_database_url.split('@')[-1] if '@' in settings.async_database_url else 'SECRET'}")
 
     yield
 
@@ -51,7 +52,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="台股價值投資分析系統",
     description="長期價值投資者的專業股票分析工具 — 聚焦企業體質與合理估值",
-    version="0.1.1",
+    version="0.1.2",
     lifespan=lifespan,
 )
 
@@ -68,14 +69,20 @@ async def cors_handler(request: Request, call_next):
         response.headers["Access-Control-Max-Age"] = "86400"
         return response
     
-    # 處理正常請求
-    response = await call_next(request)
+    try:
+        response = await call_next(request)
+    except Exception as e:
+        logger.exception(f"💥 未攔截的異常: {e}")
+        from fastapi.responses import JSONResponse
+        response = JSONResponse(
+            status_code=500,
+            content={"detail": "伺服器內部錯誤", "error": str(e)}
+        )
+    
     response.headers["Access-Control-Allow-Origin"] = "*"
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
     response.headers["Access-Control-Allow-Headers"] = "*"
     
-    # 日誌記錄
-    logger.info(f"📡 {request.method} {request.url} -> {response.status_code} (CORS Header Added)")
     return response
 
 # 註冊路由
