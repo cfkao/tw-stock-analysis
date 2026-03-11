@@ -51,27 +51,32 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="台股價值投資分析系統",
     description="長期價值投資者的專業股票分析工具 — 聚焦企業體質與合理估值",
-    version="0.1.0",
+    version="0.1.1",
     lifespan=lifespan,
 )
 
-# 請求日誌中間件 (Debug)
+# 極緻 CORS 模式 - 手動注入所有 Header 確保瀏覽器通訊
 @app.middleware("http")
-async def log_requests(request: Request, call_next):
-    logger.info(f"📡 收到請求: {request.method} {request.url}")
+async def cors_handler(request: Request, call_next):
+    # 處理 Preflight (OPTIONS)
+    if request.method == "OPTIONS":
+        from fastapi.responses import Response
+        response = Response()
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+        response.headers["Access-Control-Max-Age"] = "86400"
+        return response
+    
+    # 處理正常請求
     response = await call_next(request)
-    logger.info(f"✅ 回應請求: {request.method} {request.url} 狀態碼: {response.status_code}")
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    
+    # 日誌記錄
+    logger.info(f"📡 {request.method} {request.url} -> {response.status_code} (CORS Header Added)")
     return response
-
-# CORS 設定 - 極致相容模式
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    expose_headers=["*"],
-)
 
 # 註冊路由
 app.include_router(stocks.router, prefix="/api/v1/stocks", tags=["股票"])
