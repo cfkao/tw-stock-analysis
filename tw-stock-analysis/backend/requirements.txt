@@ -23,3 +23,10 @@ apscheduler==3.10.4
 
 # === Line Bot (Phase 5) ===
 # line-bot-sdk==3.14.0
+
+# === AI & ML ===
+openai>=1.14.0
+
+# === Deployment & DB ===
+asyncpg>=0.29.0
+gunicorn>=21.2.0

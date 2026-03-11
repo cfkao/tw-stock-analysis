@@ -23,6 +23,16 @@ class Settings(BaseSettings):
     openai_api_key: str | None = None
 
     @property
+    def async_database_url(self) -> str:
+        """處理雲端平台 (如 Render, Heroku) 預設提供的 postgres:// 連線字串"""
+        url = self.database_url
+        if url.startswith("postgres://"):
+            return url.replace("postgres://", "postgresql+asyncpg://", 1)
+        if url.startswith("postgresql://") and "asyncpg" not in url:
+            return url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return url
+
+    @property
     def cors_origins(self) -> list[str]:
         return [origin.strip() for origin in self.backend_cors_origins.split(",")]
 
