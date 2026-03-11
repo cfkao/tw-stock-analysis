@@ -9,7 +9,7 @@ from datetime import date, datetime, timedelta
 from typing import Any
 
 from sqlalchemy import select, func, text
-from sqlalchemy.dialects.postgresql import insert as pg_insert
+from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import async_session
@@ -45,7 +45,7 @@ class SyncService:
         inserted, updated = 0, 0
         async with async_session() as session:
             for row in data:
-                stmt = pg_insert(StockInfo).values(
+                stmt = sqlite_insert(StockInfo).values(
                     stock_id=row["stock_id"],
                     stock_name=row.get("stock_name", ""),
                     industry_category=row.get("industry_category"),
@@ -89,9 +89,9 @@ class SyncService:
 
         async with async_session() as session:
             for row in data:
-                stmt = pg_insert(DailyPrice).values(
+                stmt = sqlite_insert(DailyPrice).values(
                     stock_id=row["stock_id"],
-                    date=row["date"],
+                    date=self._safe_date(row.get("date")),
                     trading_volume=self._safe_int(row.get("Trading_Volume")),
                     trading_money=self._safe_int(row.get("Trading_money")),
                     open=self._safe_float(row.get("open")),
@@ -101,7 +101,7 @@ class SyncService:
                     spread=self._safe_float(row.get("spread")),
                     trading_turnover=self._safe_int(row.get("Trading_turnover")),
                 ).on_conflict_do_update(
-                    constraint="uq_daily_price_stock_date",
+                    index_elements=["stock_id", "date"],
                     set_={
                         "trading_volume": self._safe_int(row.get("Trading_Volume")),
                         "trading_money": self._safe_int(row.get("Trading_money")),
@@ -138,14 +138,14 @@ class SyncService:
 
         async with async_session() as session:
             for row in data:
-                stmt = pg_insert(StockPER).values(
+                stmt = sqlite_insert(StockPER).values(
                     stock_id=row["stock_id"],
-                    date=row["date"],
+                    date=self._safe_date(row.get("date")),
                     per=self._safe_float(row.get("PER")),
                     pbr=self._safe_float(row.get("PBR")),
                     dividend_yield=self._safe_float(row.get("dividend_yield")),
                 ).on_conflict_do_update(
-                    constraint="idx_stock_per_stock_date",
+                    index_elements=["stock_id", "date"],
                     set_={
                         "per": self._safe_float(row.get("PER")),
                         "pbr": self._safe_float(row.get("PBR")),
@@ -195,15 +195,15 @@ class SyncService:
 
             async with async_session() as session:
                 for row in data:
-                    stmt = pg_insert(FinancialStatement).values(
+                    stmt = sqlite_insert(FinancialStatement).values(
                         stock_id=row["stock_id"],
-                        date=row["date"],
+                        date=self._safe_date(row.get("date")),
                         source=source_name,
                         type=row.get("type", ""),
                         value=self._safe_float(row.get("value")),
                         origin_name=row.get("origin_name"),
                     ).on_conflict_do_update(
-                        constraint="uq_financial_stock_date_source_type",
+                        index_elements=["stock_id", "date", "source", "type"],
                         set_={
                             "value": self._safe_float(row.get("value")),
                             "origin_name": row.get("origin_name"),
@@ -237,9 +237,9 @@ class SyncService:
 
         async with async_session() as session:
             for row in data:
-                stmt = pg_insert(DividendHistory).values(
+                stmt = sqlite_insert(DividendHistory).values(
                     stock_id=row["stock_id"],
-                    date=row["date"],
+                    date=self._safe_date(row.get("date")),
                     year=row.get("year"),
                     cash_earnings_distribution=self._safe_float(row.get("CashEarningsDistribution")),
                     cash_statutory_surplus=self._safe_float(row.get("CashStatutorySurplus")),
@@ -250,7 +250,7 @@ class SyncService:
                     cash_dividend_payment_date=self._safe_date(row.get("CashDividendPaymentDate")),
                     announcement_date=self._safe_date(row.get("AnnouncementDate")),
                 ).on_conflict_do_update(
-                    constraint="uq_dividend_stock_date",
+                    index_elements=["stock_id", "date"],
                     set_={
                         "cash_earnings_distribution": self._safe_float(row.get("CashEarningsDistribution")),
                         "cash_statutory_surplus": self._safe_float(row.get("CashStatutorySurplus")),
@@ -287,15 +287,15 @@ class SyncService:
 
         async with async_session() as session:
             for row in data:
-                stmt = pg_insert(MonthlyRevenue).values(
+                stmt = sqlite_insert(MonthlyRevenue).values(
                     stock_id=row["stock_id"],
-                    date=row["date"],
+                    date=self._safe_date(row.get("date")),
                     country=row.get("country", "TW"),
                     revenue=self._safe_int(row.get("revenue")),
                     revenue_month=self._safe_int(row.get("revenue_month")),
                     revenue_year=self._safe_int(row.get("revenue_year")),
                 ).on_conflict_do_update(
-                    constraint="uq_monthly_revenue_stock_date",
+                    index_elements=["stock_id", "date"],
                     set_={
                         "revenue": self._safe_int(row.get("revenue")),
                         "revenue_month": self._safe_int(row.get("revenue_month")),

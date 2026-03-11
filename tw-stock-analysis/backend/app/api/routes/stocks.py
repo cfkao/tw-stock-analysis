@@ -75,4 +75,18 @@ async def get_stock_prices(
     )
     result = await db.execute(stmt)
     prices = result.scalars().all()
+
+    # 自動補齊機制：如果查不到任何資料，即時觸發同步 (抓近一年)
+    if not prices:
+        from app.services.sync import sync_service
+        try:
+            sync_start = (date.today() - timedelta(days=365)).isoformat()
+            await sync_service.sync_daily_prices(stock_id=stock_id, start_date=sync_start)
+            # 同步完成後再查一次
+            result = await db.execute(stmt)
+            prices = result.scalars().all()
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"自動同步 {stock_id} 股價失敗: {e}")
+
     return prices

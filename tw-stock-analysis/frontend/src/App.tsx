@@ -10,6 +10,7 @@ import Dashboard from './pages/Dashboard';
 import BacktestPage from './pages/BacktestPage';
 import WatchlistPage from './pages/WatchlistPage';
 import ComparePage from './pages/ComparePage';
+import PortfolioPage from './pages/PortfolioPage';
 import './index.css';
 
 // === 手機底部導航 ===
@@ -18,6 +19,7 @@ function MobileNav() {
   const tabs = [
     { to: '/', label: '首頁', icon: '🏠', match: (p: string) => p === '/' },
     { to: '/watchlist', label: '自選', icon: '⭐', match: (p: string) => p === '/watchlist' },
+    { to: '/portfolio', label: '持股', icon: '💼', match: (p: string) => p === '/portfolio' },
     { to: '/compare', label: '對比', icon: '⚖️', match: (p: string) => p === '/compare' },
     { to: '/backtest', label: '回測', icon: '🔬', match: (p: string) => p === '/backtest' },
   ];
@@ -83,6 +85,12 @@ function AppLayout() {
                 ⭐ 自選
               </Link>
               <Link
+                to="/portfolio"
+                className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-lg text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-850 transition-colors"
+              >
+                💼 投資組合
+              </Link>
+              <Link
                 to="/compare"
                 className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-lg text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-850 transition-colors"
               >
@@ -121,6 +129,7 @@ function AppLayout() {
           <Route path="/stock/:stockId" element={<StockDetail />} />
           <Route path="/backtest" element={<BacktestPage />} />
           <Route path="/watchlist" element={<WatchlistPage />} />
+          <Route path="/portfolio" element={<PortfolioPage />} />
           <Route path="/compare" element={<ComparePage />} />
         </Routes>
       </main>
@@ -129,7 +138,7 @@ function AppLayout() {
       <footer className="hidden sm:block border-t border-surface-200 dark:border-surface-800 mt-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <p className="text-center text-sm text-surface-900/40 dark:text-surface-200/40">
-            台股價值投資分析系統 v0.4.0 — 資料來源 FinMind API
+            台股價值投資分析系統 v0.5.0 — 資料來源 FinMind API
           </p>
         </div>
       </footer>

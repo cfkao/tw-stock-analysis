@@ -4,29 +4,44 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getWatchlist, removeFromWatchlist } from '../services/watchlist';
-import { MOCK_STOCKS } from '../services/mockData';
+import { getStockInfo } from '../services/api';
 
 export default function WatchlistPage() {
-    const [list, setList] = useState<string[]>([]);
+
+    interface WatchedStock {
+        stock_id: string;
+        stock_name: string;
+        industry: string;
+    }
+    const [stocks, setStocks] = useState<WatchedStock[]>([]);
 
     useEffect(() => {
-        setList(getWatchlist());
+        const ids = getWatchlist();
+
+        // Fetch real info for each watched stock
+        const fetchInfos = async () => {
+            const results: WatchedStock[] = [];
+            for (const id of ids) {
+                try {
+                    const info = await getStockInfo(id);
+                    results.push({
+                        stock_id: id,
+                        stock_name: info?.stock_name || id,
+                        industry: info?.industry_category || '—',
+                    });
+                } catch (e) {
+                    results.push({ stock_id: id, stock_name: id, industry: '—' });
+                }
+            }
+            setStocks(results);
+        };
+        fetchInfos();
     }, []);
 
     const handleRemove = (stockId: string) => {
-        const updated = removeFromWatchlist(stockId);
-        setList(updated);
+        removeFromWatchlist(stockId);
+        setStocks(prev => prev.filter(s => s.stock_id !== stockId));
     };
-
-    // 組合自選股資訊
-    const stocks = list.map((id) => {
-        const info = MOCK_STOCKS.find((s) => s.stock_id === id);
-        return {
-            stock_id: id,
-            stock_name: info?.stock_name || id,
-            industry: info?.industry_category || '—',
-        };
-    });
 
     return (
         <div className="animate-fade-in space-y-6">

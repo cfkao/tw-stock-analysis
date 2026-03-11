@@ -3,7 +3,7 @@ ORM Models — 股利紀錄
 """
 from datetime import date, datetime
 
-from sqlalchemy import BigInteger, Date, DateTime, Index, Numeric, String, func
+from sqlalchemy import BigInteger, Integer, Date, DateTime, Index, Numeric, String, func, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
@@ -13,7 +13,7 @@ class DividendHistory(Base):
     """股利政策紀錄"""
     __tablename__ = "dividend_history"
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     stock_id: Mapped[str] = mapped_column(String(10), nullable=False)
     date: Mapped[date] = mapped_column(Date, nullable=False)
     year: Mapped[str | None] = mapped_column(String(10))
@@ -29,4 +29,5 @@ class DividendHistory(Base):
 
     __table_args__ = (
         Index("idx_dividend_stock", "stock_id", "date"),
+        UniqueConstraint("stock_id", "date", name="uq_dividend_stock_date"),
     )

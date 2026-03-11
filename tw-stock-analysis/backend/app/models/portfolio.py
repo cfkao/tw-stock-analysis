@@ -27,7 +27,7 @@ class UserPortfolio(Base):
     """使用者投資組合"""
     __tablename__ = "user_portfolio"
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     stock_id: Mapped[str] = mapped_column(String(10), nullable=False)
     trade_type: Mapped[str] = mapped_column(String(10), nullable=False, default="buy")

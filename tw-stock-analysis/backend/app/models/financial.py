@@ -3,7 +3,7 @@ ORM Models — 財務報表相關資料表
 """
 from datetime import date, datetime
 
-from sqlalchemy import BigInteger, Date, DateTime, Index, Numeric, String, func
+from sqlalchemy import BigInteger, Integer, Date, DateTime, Index, Numeric, String, func, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
@@ -13,7 +13,7 @@ class StockPER(Base):
     """本益比 / 股價淨值比"""
     __tablename__ = "stock_per"
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     stock_id: Mapped[str] = mapped_column(String(10), nullable=False)
     date: Mapped[date] = mapped_column(Date, nullable=False)
     per: Mapped[float | None] = mapped_column(Numeric(12, 4))
@@ -23,6 +23,7 @@ class StockPER(Base):
 
     __table_args__ = (
         Index("idx_stock_per_stock_date", "stock_id", "date", unique=True),
+        UniqueConstraint("stock_id", "date", name="uq_stock_per_stock_date"),
     )
 
 
@@ -30,7 +31,7 @@ class FinancialStatement(Base):
     """財務報表 — 長表格式 (type + value)"""
     __tablename__ = "financial_statement"
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     stock_id: Mapped[str] = mapped_column(String(10), nullable=False)
     date: Mapped[date] = mapped_column(Date, nullable=False)
     source: Mapped[str] = mapped_column(String(50), nullable=False)
@@ -42,6 +43,7 @@ class FinancialStatement(Base):
     __table_args__ = (
         Index("idx_financial_stock_date", "stock_id", "date"),
         Index("idx_financial_type", "type", "stock_id"),
+        UniqueConstraint("stock_id", "date", "source", "type", name="uq_financial_stock_date_source_type"),
     )
 
 
@@ -49,7 +51,7 @@ class MonthlyRevenue(Base):
     """月營收"""
     __tablename__ = "monthly_revenue"
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     stock_id: Mapped[str] = mapped_column(String(10), nullable=False)
     date: Mapped[date] = mapped_column(Date, nullable=False)
     country: Mapped[str | None] = mapped_column(String(10), default="TW")

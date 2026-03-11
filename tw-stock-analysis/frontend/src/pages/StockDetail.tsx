@@ -14,6 +14,7 @@ import {
     DebtCashFlow,
     StockNotes,
 } from '../components/AdvancedAnalysis';
+import StockNews from '../components/StockNews';
 import {
     getStockInfo,
     getStockPrices,
@@ -32,7 +33,7 @@ export default function StockDetail() {
     const [roe, setRoe] = useState<TrendData[]>([]);
     const [fcf, setFcf] = useState<TrendData[]>([]);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<'chart' | 'valuation' | 'health' | 'analysis'>('chart');
+    const [activeTab, setActiveTab] = useState<'chart' | 'valuation' | 'health' | 'analysis' | 'news'>('chart');
     const [watched, setWatched] = useState(false);
 
     useEffect(() => {
@@ -83,6 +84,7 @@ export default function StockDetail() {
         { key: 'valuation' as const, label: '📊 估值分析' },
         { key: 'health' as const, label: '🏥 財務健診' },
         { key: 'analysis' as const, label: '🔬 深度分析' },
+        { key: 'news' as const, label: '📰 相關新聞' },
     ];
 
     return (
@@ -185,6 +187,10 @@ export default function StockDetail() {
                         <DividendChart stockId={stockId!} />
                         <StockNotes stockId={stockId!} />
                     </>
+                )}
+
+                {activeTab === 'news' && (
+                    <StockNews stockId={stockId!} />
                 )}
             </div>
         </div>

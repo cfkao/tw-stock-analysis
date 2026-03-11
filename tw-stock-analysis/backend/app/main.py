@@ -8,7 +8,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.api.routes import stocks, financials, portfolio, backtest, sync
+from app.api.routes import stocks, financials, portfolio, backtest, sync, news
 
 # 設定 logging
 logging.basicConfig(
@@ -59,6 +59,7 @@ app.include_router(financials.router, prefix="/api/v1/financials", tags=["財務
 app.include_router(portfolio.router, prefix="/api/v1/portfolio", tags=["投資組合"])
 app.include_router(backtest.router, prefix="/api/v1/backtest", tags=["回測"])
 app.include_router(sync.router, prefix="/api/v1/sync", tags=["資料同步"])
+app.include_router(news.router, prefix="/api/v1/stocks", tags=["股票新聞"])
 
 
 @app.get("/", tags=["系統"])

@@ -71,6 +71,25 @@ export interface SyncLog {
     error_message: string | null;
 }
 
+// === 新聞 ===
+export interface StockNews {
+    title: string;
+    link: string;
+    pub_date: string;
+    source: string;
+    description: string | null;
+    related_news?: StockNews[];
+}
+
+// === 新聞 AI 分析 ===
+export interface NewsAnalysis {
+    sentiment_score: number;
+    themes: string[];
+    pros: string[];
+    cons: string[];
+    summary: string;
+}
+
 // === K 線圖設定 ===
 export type ChartPeriod = 'daily' | 'weekly' | 'monthly';
 export type ChartTimeRange = '1M' | '3M' | '6M' | '1Y' | '3Y' | '5Y' | '10Y';
