@@ -52,7 +52,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="台股價值投資分析系統",
     description="長期價值投資者的專業股票分析工具 — 聚焦企業體質與合理估值",
-    version="0.1.3",
+    version="0.1.4",
     lifespan=lifespan,
 )
 
@@ -106,13 +106,29 @@ async def root():
 async def manual_init_db():
     from app.database import engine, Base
     import app.models
+    from urllib.parse import urlparse
+    
+    # 提取並檢查連線資訊 (去敏)
+    db_url = settings.database_url
+    parsed = urlparse(db_url)
+    masked_url = f"{parsed.scheme}://{parsed.username}:****@{parsed.hostname}:{parsed.port}{parsed.path}"
+    logger.info(f"🔍 正在嘗試初始化資料庫，連線位址: {masked_url}")
+    
     try:
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
-        return {"status": "success", "message": "資料庫表已手動建立/同步完成"}
+        return {"status": "success", "message": "資料庫表已建立/同步完成", "target_host": parsed.hostname}
     except Exception as e:
-        logger.error(f"手動初始化失敗: {e}")
-        return {"status": "error", "message": str(e)}
+        logger.error(f"❌ 手動初始化失敗: {e}")
+        return {
+            "status": "error", 
+            "message": str(e), 
+            "hint": "請檢查 Render 的 DATABASE_URL 是否正確 (特別是 Hostname)",
+            "debug_info": {
+                "hostname": parsed.hostname,
+                "scheme": parsed.scheme
+            }
+        }
 
 
 @app.get("/health", tags=["系統"])
