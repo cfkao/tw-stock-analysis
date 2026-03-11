@@ -34,8 +34,13 @@ async def lifespan(app: FastAPI):
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
         logger.info("✅ 資料庫表已同步/建立完成")
+        
+        # 啟動時自動同步基本股票列表 (確保資料庫不是空的)
+        from app.services.sync import sync_service
+        await sync_service.sync_stock_info()
+        logger.info("✅ 初始股票列表同步完成")
     except Exception as e:
-        logger.error(f"❌ 資料庫初始化失敗: {e}")
+        logger.error(f"❌ 初始化/同步失敗: {e}")
 
     # 2. 啟動排程器 (Phase 2)
     from app.services.scheduler import scheduler_service
@@ -54,7 +59,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="台股價值投資分析系統",
     description="長期價值投資者的專業股票分析工具 — 聚焦企業體質與合理估值",
-    version="1.1.0",
+    version="1.1.1",
     lifespan=lifespan,
 )
 
@@ -94,6 +99,23 @@ async def db_status(
             "status": "connected",
             "version": app.version,
             "counts": counts
+        }
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
+@app.get("/api/v1/sync/force-sync/{stock_id}", tags=["資料同步"])
+async def force_sync(stock_id: str):
+    from app.services.sync import sync_service
+    try:
+        # 只同步股價與基本面數據，用於快速驗證
+        price_result = await sync_service.sync_daily_prices(stock_id)
+        per_result = await sync_service.sync_stock_per(stock_id)
+        return {
+            "status": "success",
+            "stock_id": stock_id,
+            "prices": price_result,
+            "per": per_result
         }
     except Exception as e:
         return {"status": "error", "message": str(e)}
