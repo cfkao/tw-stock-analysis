@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: tw-stock-api
+    env: python
+    region: singapore
+    buildCommand: "cd backend && pip install -r requirements.txt"
+    startCommand: "cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: APP_ENV
+        value: production
+      - key: BACKEND_CORS_ORIGINS
+        value: "https://cfkao.github.io"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: tw-stock-db
+          property: connectionString
+      # ⚠️ 請在 Render Dashboard 中手動填寫以下機密變數
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: FINMIND_API_TOKEN
+        sync: false
+
+databases:
+  - name: tw-stock-db
+    databaseName: tw_stock
+    user: admin
+    region: singapore
+    plan: free
