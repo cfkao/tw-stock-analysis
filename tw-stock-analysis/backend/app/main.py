@@ -52,38 +52,20 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="台股價值投資分析系統",
     description="長期價值投資者的專業股票分析工具 — 聚焦企業體質與合理估值",
-    version="0.1.4",
+    version="1.0.0",
     lifespan=lifespan,
 )
 
-# 極緻 CORS 模式 - 手動注入所有 Header 確保瀏覽器通訊
-@app.middleware("http")
-async def cors_handler(request: Request, call_next):
-    # 處理 Preflight (OPTIONS)
-    if request.method == "OPTIONS":
-        from fastapi.responses import Response
-        response = Response()
-        response.headers["Access-Control-Allow-Origin"] = "*"
-        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
-        response.headers["Access-Control-Allow-Headers"] = "*"
-        response.headers["Access-Control-Max-Age"] = "86400"
-        return response
-    
-    try:
-        response = await call_next(request)
-    except Exception as e:
-        logger.exception(f"💥 未攔截的異常: {e}")
-        from fastapi.responses import JSONResponse
-        response = JSONResponse(
-            status_code=500,
-            content={"detail": "伺服器內部錯誤", "error": str(e)}
-        )
-    
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
-    response.headers["Access-Control-Allow-Headers"] = "*"
-    
-    return response
+# CORS 設定
+# 為了穩定性與安全，生產環境建議在環境變數 BACKEND_CORS_ORIGINS 指定具體來源
+# 目前使用通配符以確保通訊順暢，但關閉 allow_credentials 以符合瀏覽器規範
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # 註冊路由
 app.include_router(stocks.router, prefix="/api/v1/stocks", tags=["股票"])
@@ -101,34 +83,6 @@ async def root():
         "version": app.version,
         "status": "running",
     }
-
-@app.get("/api/v1/sync/init-db", tags=["資料同步"])
-async def manual_init_db():
-    from app.database import engine, Base
-    import app.models
-    from urllib.parse import urlparse
-    
-    # 提取並檢查連線資訊 (去敏)
-    db_url = settings.database_url
-    parsed = urlparse(db_url)
-    masked_url = f"{parsed.scheme}://{parsed.username}:****@{parsed.hostname}:{parsed.port}{parsed.path}"
-    logger.info(f"🔍 正在嘗試初始化資料庫，連線位址: {masked_url}")
-    
-    try:
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-        return {"status": "success", "message": "資料庫表已建立/同步完成", "target_host": parsed.hostname}
-    except Exception as e:
-        logger.error(f"❌ 手動初始化失敗: {e}")
-        return {
-            "status": "error", 
-            "message": str(e), 
-            "hint": "請檢查 Render 的 DATABASE_URL 是否正確 (特別是 Hostname)",
-            "debug_info": {
-                "hostname": parsed.hostname,
-                "scheme": parsed.scheme
-            }
-        }
 
 
 @app.get("/health", tags=["系統"])

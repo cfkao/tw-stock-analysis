@@ -9,7 +9,7 @@ from datetime import date, datetime, timedelta
 from typing import Any
 
 from sqlalchemy import select, func, text
-from sqlalchemy.dialects.sqlite import insert as sqlite_insert
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import async_session
@@ -45,7 +45,7 @@ class SyncService:
         inserted, updated = 0, 0
         async with async_session() as session:
             for row in data:
-                stmt = sqlite_insert(StockInfo).values(
+                stmt = pg_insert(StockInfo).values(
                     stock_id=row["stock_id"],
                     stock_name=row.get("stock_name", ""),
                     industry_category=row.get("industry_category"),
@@ -89,7 +89,7 @@ class SyncService:
 
         async with async_session() as session:
             for row in data:
-                stmt = sqlite_insert(DailyPrice).values(
+                stmt = pg_insert(DailyPrice).values(
                     stock_id=row["stock_id"],
                     date=self._safe_date(row.get("date")),
                     trading_volume=self._safe_int(row.get("Trading_Volume")),
@@ -138,7 +138,7 @@ class SyncService:
 
         async with async_session() as session:
             for row in data:
-                stmt = sqlite_insert(StockPER).values(
+                stmt = pg_insert(StockPER).values(
                     stock_id=row["stock_id"],
                     date=self._safe_date(row.get("date")),
                     per=self._safe_float(row.get("PER")),
@@ -195,7 +195,7 @@ class SyncService:
 
             async with async_session() as session:
                 for row in data:
-                    stmt = sqlite_insert(FinancialStatement).values(
+                    stmt = pg_insert(FinancialStatement).values(
                         stock_id=row["stock_id"],
                         date=self._safe_date(row.get("date")),
                         source=source_name,
@@ -237,7 +237,7 @@ class SyncService:
 
         async with async_session() as session:
             for row in data:
-                stmt = sqlite_insert(DividendHistory).values(
+                stmt = pg_insert(DividendHistory).values(
                     stock_id=row["stock_id"],
                     date=self._safe_date(row.get("date")),
                     year=row.get("year"),
@@ -287,7 +287,7 @@ class SyncService:
 
         async with async_session() as session:
             for row in data:
-                stmt = sqlite_insert(MonthlyRevenue).values(
+                stmt = pg_insert(MonthlyRevenue).values(
                     stock_id=row["stock_id"],
                     date=self._safe_date(row.get("date")),
                     country=row.get("country", "TW"),
