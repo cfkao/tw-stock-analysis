@@ -3,8 +3,8 @@ services:
     name: tw-stock-api
     env: python
     region: singapore
-    buildCommand: "cd backend && pip install -r requirements.txt"
-    startCommand: "cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    buildCommand: "cd tw-stock-analysis/backend && pip install -r requirements.txt"
+    startCommand: "cd tw-stock-analysis/backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
