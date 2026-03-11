@@ -49,7 +49,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,  # 與 allow_origins=["*"] 相容
     allow_methods=["*"],
     allow_headers=["*"],
 )
