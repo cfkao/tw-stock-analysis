@@ -62,7 +62,7 @@ app.include_router(sync.router, prefix="/api/v1/sync", tags=["資料同步"])
 app.include_router(news.router, prefix="/api/v1/stocks", tags=["股票新聞"])
 
 
-@app.get("/", tags=["系統"])
+@app.api_route("/", methods=["GET", "HEAD"], tags=["系統"])
 async def root():
     return {
         "name": "台股價值投資分析系統",
